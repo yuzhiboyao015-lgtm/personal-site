@@ -75,31 +75,44 @@ src/
 
 ## 部署
 
-### Vercel（推荐）
+### Cloudflare Pages（当前选定的方案）
 
-1. 把项目推到 GitHub（见下）
-2. 打开 <https://vercel.com/new>，选这个仓库，框架会自动识别成 Next.js，直接 Deploy
-3. 想要自己的域名：Vercel 项目 → Settings → Domains 里绑定
+站点已配置成**静态导出**（见 `next.config.ts` 的 `output: "export"`），构建产物是纯 HTML，静态托管直接吃。
 
-### Cloudflare Pages
+Web 端配置（Cloudflare Dashboard → Workers & Pages → Create → Pages → 连接 Git 仓库）：
 
-- Build command：`pnpm build`
-- Build output directory：`.next`
-- 环境变量：`NODE_VERSION=22`
+| 项 | 值 |
+| --- | --- |
+| Framework preset | `Next.js (Static HTML Export)` |
+| Build command | `pnpm build` |
+| Build output directory | `out` |
+| 环境变量 | `NODE_VERSION` = `22` |
+| 环境变量（可选） | `NEXT_PUBLIC_SITE_URL` = `https://你的域名` |
+
+部署完成后会先拿到一个 `xxx.pages.dev` 的免费域名，能马上访问。绑定自己的域名：
+Pages 项目 → Custom domains → 输入域名 → 按提示加 DNS 记录（域名托管在 Cloudflare 的话是一键）。
+
+> 为什么不用 Vercel：`*.vercel.app` 的默认域名在国内被 DNS 污染，自定义域名解析到 Vercel 也不稳。
+> Cloudflare 的全球网络在国内可用性更好，且 Pages 免费额度是无限带宽。
+
+### 本地预览构建产物
+
+```powershell
+pnpm build
+pnpm serve     # 静态服务器跑在 http://localhost:4173
+```
 
 ### 推 GitHub
 
 ```powershell
 cd C:\dev\personal-site
-git init
-git add .
-git commit -m "feat: 个人网站初版"
-git branch -M main
-git remote add origin https://github.com/<你的用户名>/personal-site.git
+git add -A
+git commit -m "feat: ..."
+git remote add origin https://github.com/<用户名>/personal-site.git   # 只需一次
 git push -u origin main
 ```
 
-本机直连 GitHub 会失败，需要走代理：
+本机直连 GitHub 会失败，推送要带代理：
 
 ```powershell
 git -c http.sslBackend=openssl -c http.proxy=http://127.0.0.1:7890 push -u origin main
