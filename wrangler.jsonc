@@ -1,0 +1,25 @@
+{
+  // Cloudflare Workers 配置文件：让 Cloudflare 知道这是个纯静态站、产物在 out/
+  // 文档：https://developers.cloudflare.com/workers/static-assets/
+  "$schema": "./node_modules/wrangler/config-schema.json",
+
+  // 项目名。**要和 Cloudflare 建项目时填的 Project name 完全一致**
+  // （你在面板里填的是什么，这里就改成什么）
+  "name": "wangyao",
+
+  // 用今天的日期，Cloudflare 用它决定运行时行为
+  "compatibility_date": "2026-10-09",
+
+  "assets": {
+    // Next.js 静态导出的产物目录（next.config.ts 里 output: "export"）
+    "directory": "./out",
+
+    // 找不到的路径返回 404.html（我们自己的 404 页面）
+    // 注意：这里刻意不用 "single-page-application"，因为本站是多页面静态站，
+    // 用 SPA 模式会把所有不存在的路径都当成 200 返回首页，SEO 上是错的。
+    "not_found_handling": "404-page"
+  }
+
+  // 刻意不写 "main"：本站没有任何 Worker 脚本，纯静态。
+  // 官方文档：没有 Worker 脚本时，匹配不到资源的请求直接返回 404。
+}

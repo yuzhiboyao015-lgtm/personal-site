@@ -26,6 +26,10 @@ debug.log
 # env
 .env
 .env*.local
+.dev.vars*
+
+# cloudflare
+.wrangler/
 
 # typescript
 *.tsbuildinfo

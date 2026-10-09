@@ -75,25 +75,56 @@ src/
 
 ## 部署
 
-### Cloudflare Pages（当前选定的方案）
+### Cloudflare（当前选定的方案）
 
-站点已配置成**静态导出**（见 `next.config.ts` 的 `output: "export"`），构建产物是纯 HTML，静态托管直接吃。
+站点已配置成**静态导出**（见 `next.config.ts` 的 `output: "export"`），并且带了 `wrangler.jsonc`
+告诉 Cloudflare 产物在 `out/`。
 
-Web 端配置（Cloudflare Dashboard → Workers & Pages → Create → Pages → 连接 Git 仓库）：
+> **注意**：Cloudflare 现在把 Pages 往 **Workers** 合并了，Dashboard 里点进
+> Workers & Pages → Create 走的就是 Workers 流程（有 `Deploy command: npx wrangler deploy` 那一栏）。
+> 这是对的，不用去找 Pages 入口——只要仓库里有 `wrangler.jsonc` 就行。
 
-| 项 | 值 |
+Dashboard 上创建项目时按下表填（仓库连 `personal-site`）：
+
+| 字段 | 值 |
 | --- | --- |
-| Framework preset | `Next.js (Static HTML Export)` |
+| Project name | `wangyao`（**必须和 `wrangler.jsonc` 里的 `name` 一致**） |
 | Build command | `pnpm build` |
-| Build output directory | `out` |
-| 环境变量 | `NODE_VERSION` = `22` |
-| 环境变量（可选） | `NEXT_PUBLIC_SITE_URL` = `https://你的域名` |
+| Deploy command | `npx wrangler deploy`（默认值，不用改） |
+| Preview command | `npx wrangler preview`（默认值，不用改） |
+| 环境变量（可选） | `NODE_VERSION` = `22` |
 
-部署完成后会先拿到一个 `xxx.pages.dev` 的免费域名，能马上访问。绑定自己的域名：
-Pages 项目 → Custom domains → 输入域名 → 按提示加 DNS 记录（域名托管在 Cloudflare 的话是一键）。
+连上之后，每次 `git push` 到 `main`，Cloudflare 会自动构建 + 部署。
+
+**关键配置在 `wrangler.jsonc`**：
+
+```jsonc
+{
+  "name": "wangyao",                    // 和 Dashboard 的项目名一致
+  "assets": {
+    "directory": "./out",               // Next 静态导出的产物目录
+    "not_found_handling": "404-page"    // 用我们自己的 404 页面
+  }
+}
+```
+
+- 刻意**没有 `main` 字段**：本站没有任何 Worker 脚本，纯静态资源。
+- 刻意**不用 `single-page-application` 模式**：本站是多页面静态站，SPA 模式会把不存在的地址
+  一律返回 200 + 首页，对 SEO 是错的。
+
+改完配置想本地验证（不会真的部署）：
+
+```powershell
+pnpm build
+pnpm exec wrangler deploy --dry-run
+```
+
+看到 `Read N files from the assets directory .../out` 且无 error，就说明配置没问题。
+
+绑定自己的域名：Cloudflare Dashboard → 该 Worker → Settings → Domains & Routes → Add → Custom domain。
 
 > 为什么不用 Vercel：`*.vercel.app` 的默认域名在国内被 DNS 污染，自定义域名解析到 Vercel 也不稳。
-> Cloudflare 的全球网络在国内可用性更好，且 Pages 免费额度是无限带宽。
+> Cloudflare 的全球网络在国内可用性更好，且静态资源额度免费不限量。
 
 ### 本地预览构建产物
 

@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "serve": "node scripts/serve-out.mjs",
+    "deploy": "wrangler deploy",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
@@ -30,6 +31,7 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.5.27",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "wrangler": "^4.149.0"
   }
 }
