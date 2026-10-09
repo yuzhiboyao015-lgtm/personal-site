@@ -1,0 +1,24 @@
+# pnpm 工作区配置
+#
+# 为什么需要这个文件：pnpm 10.3 起 `strictDepBuilds` 默认为 true——
+# 只要有任何依赖带「未审核的构建脚本」，`pnpm install` 就以非零退出码结束：
+#   [ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: esbuild@0.28.1, ...
+# 本机之所以一直没暴露，是因为 node_modules 已存在、走的是缓存路径；
+# 全新安装（以及 Cloudflare 的 CI 构建）会直接失败。
+#
+# 这里只显式放行确实需要跑构建脚本的 3 个包，而不用 dangerouslyAllowAllBuilds 全放开——
+# 其余任何新增依赖的构建脚本仍会被拦住、需要重新审核。
+#
+# 注意：v11 已移除 onlyBuiltDependencies / neverBuiltDependencies，统一用下面的 allowBuilds 映射。
+# 文档：https://pnpm.io/settings/build#allowbuilds
+#
+# ⚠️ 这三个值必须是布尔 true，不能留成 pnpm 自动生成的占位符
+#    （占位符是字符串 "set this to true or false"，等于没审核，安装照样失败）
+
+allowBuilds:
+  # Tailwind v4 / Vite 的底层打包器，脚本负责放置平台二进制
+  esbuild: true
+  # wrangler 的运行时（Workers 本地模拟器），约 92 MB 的平台二进制
+  workerd: true
+  # eslint-config-next 依赖链里的原生解析器
+  unrs-resolver: true
