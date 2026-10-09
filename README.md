@@ -121,6 +121,31 @@ pnpm exec wrangler deploy --dry-run
 
 看到 `Read N files from the assets directory .../out` 且无 error，就说明配置没问题。
 
+### ⚠️ 依赖不能"太新"（Cloudflare 构建失败的常见原因）
+
+Cloudflare 构建时执行 `pnpm install --frozen-lockfile`，而它的环境默认开启了 pnpm 的
+`minimumReleaseAge` 策略（**24 小时**）：任何一个依赖的**发布时间晚于"现在 - 24 小时"**，
+安装就会被拒绝，构建直接失败，报：
+
+```
+[ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION] N lockfile entries failed verification:
+  wrangler@4.149.0 was published 2026-10-08T18:24:00Z, within the minimumReleaseAge cutoff
+```
+
+**所以升级依赖后、推送前，先跑一次审计**（会去 npm 逐个核对发布时间）：
+
+```powershell
+node scripts/audit-release-age.mjs
+```
+
+- 输出 `✅ 全部核实完毕` 才能推
+- 输出 `❌ 有 N 个包太新` 就把那几个包**钉到更旧的版本**（去掉 `^`，写死版本号），
+  重新 `pnpm install` 让锁文件同步，再跑一次审计
+
+> 本机 pnpm 的 `minimumReleaseAge` 是 `0`（不检查），**所以本机能装成功不代表 Cloudflare 能装成功**——
+> 这就是第一次部署失败的原因：`wrangler@4.149.0` 是当天刚发布的版本。
+> 现在 `wrangler` 已钉死在 `4.148.0`（不加 `^`），别随手升它。
+
 绑定自己的域名：Cloudflare Dashboard → 该 Worker → Settings → Domains & Routes → Add → Custom domain。
 
 > 为什么不用 Vercel：`*.vercel.app` 的默认域名在国内被 DNS 污染，自定义域名解析到 Vercel 也不稳。
