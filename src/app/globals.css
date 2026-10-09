@@ -1,0 +1,396 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   字体：自托管（public/fonts/*.woff2，来自 @fontsource，SIL OFL 许可）
+   —— 为什么不用 next/font/google？因为构建时要去 fonts.googleapis.com 拉字体，
+      国内网络下会直接让构建失败。自托管一次下载，之后构建永久可用。
+   —— 只带 latin 子集：中文交给系统字体，省下好几 MB。
+   =========================================================================== */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/inter-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/inter-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/inter-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/inter-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/space-grotesk-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/space-grotesk-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/space-grotesk-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/space-grotesk-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-700.woff2") format("woff2");
+}
+
+/* ===========================================================================
+   设计变量：只改这里，全站配色跟着变
+   —— 想换主色？把 --accent / --accent-2 / --accent-3 换掉就行
+   =========================================================================== */
+:root {
+  /* 字体栈：英文走自托管字体，中文自动落到系统字体 */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui,
+    "Microsoft YaHei", "PingFang SC", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+
+  --bg: #04070f;
+  --bg-soft: #080e1c;
+  --surface: rgba(255, 255, 255, 0.035);
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.18);
+  --fg: #eaf2ff;
+  --fg-muted: #8ba3c7;
+  --fg-dim: #5a6f8f;
+
+  --accent: #38bdf8;
+  --accent-2: #818cf8;
+  --accent-3: #22d3ee;
+  --glow: 56 189 248;
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f8fc;
+  --bg-soft: #ffffff;
+  --surface: rgba(6, 12, 30, 0.03);
+  --line: rgba(6, 12, 30, 0.1);
+  --line-strong: rgba(6, 12, 30, 0.2);
+  --fg: #08111f;
+  --fg-muted: #4a5a75;
+  --fg-dim: #6b7d99;
+  --accent: #0284c7;
+  --accent-2: #4f46e5;
+  --accent-3: #0891b2;
+  --glow: 2 132 199;
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
+  /* 顶部导航是固定的，锚点跳转留出余量 */
+  scroll-padding-top: 6rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--fg);
+}
+
+/* 细滚动条，别让默认那根白条破坏气氛 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 99px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* ===========================================================================
+   组件类
+   =========================================================================== */
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 1120px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  .surface {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    backdrop-filter: blur(12px);
+  }
+
+  /* 卡片右上角那圈发光，hover 时亮起来 */
+  .card-glow {
+    position: relative;
+    isolation: isolate;
+  }
+  .card-glow::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgb(var(--glow) / 0.5),
+      transparent 40%,
+      transparent 60%,
+      rgb(var(--glow) / 0.25)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .card-glow:hover::after {
+    opacity: 1;
+  }
+
+  .text-gradient {
+    background: linear-gradient(
+      100deg,
+      var(--accent-3) 0%,
+      var(--accent) 45%,
+      var(--accent-2) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glow-ring {
+    box-shadow:
+      0 0 0 1px rgb(var(--glow) / 0.28),
+      0 0 50px -12px rgb(var(--glow) / 0.55);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.35rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #04070f;
+    background: linear-gradient(120deg, var(--accent-3), var(--accent));
+    transition:
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.25s ease;
+    box-shadow: 0 8px 30px -12px rgb(var(--glow) / 0.8);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 40px -12px rgb(var(--glow) / 0.95);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.35rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--fg);
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    transition:
+      border-color 0.25s ease,
+      background 0.25s ease,
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-ghost:hover {
+    border-color: rgb(var(--glow) / 0.6);
+    background: rgb(var(--glow) / 0.08);
+    transform: translateY(-2px);
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+}
+
+/* ===========================================================================
+   装饰：背景网格 + 噪点
+   =========================================================================== */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+}
+
+.bg-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ===========================================================================
+   动画
+   =========================================================================== */
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -22px, 0) scale(1.04);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-floaty {
+  animation: floaty 9s ease-in-out infinite;
+}
+.animate-pulse-soft {
+  animation: pulse-soft 3.4s ease-in-out infinite;
+}
+.animate-marquee {
+  animation: marquee 26s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-floaty,
+  .animate-pulse-soft,
+  .animate-marquee {
+    animation: none !important;
+  }
+}
+
+/* 代码块 */
+.prose-post {
+  font-size: 1.02rem;
+  line-height: 1.85;
+  color: var(--fg-muted);
+}
+.prose-post p {
+  margin-block: 1.15rem;
+}
+.prose-post h2 {
+  margin-top: 2.75rem;
+  margin-bottom: 0.9rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.prose-post code {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.88em;
+  padding: 0.15em 0.4em;
+  border-radius: 0.35rem;
+  background: rgb(var(--glow) / 0.12);
+  color: var(--fg);
+}
