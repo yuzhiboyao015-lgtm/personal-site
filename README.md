@@ -146,6 +146,40 @@ node scripts/audit-release-age.mjs
 > 这就是第一次部署失败的原因：`wrangler@4.149.0` 是当天刚发布的版本。
 > 现在 `wrangler` 已钉死在 `4.148.0`（不加 `^`），别随手升它。
 
+### ⚠️ 依赖的构建脚本必须显式放行（`pnpm-workspace.yaml`）
+
+pnpm 10.3 起 `strictDepBuilds` **默认为 true**：只要有任何依赖带"未审核的构建脚本"，
+`pnpm install` 就以非零退出码结束——
+
+```
+[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: esbuild@0.28.1, unrs-resolver@1.12.2, workerd@1.20261006.1
+Run "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.
+```
+
+在 Cloudflare 上表现为 `Failed: error occurred while installing tools or dependencies`（第二次部署失败的原因）。
+
+**本机很难发现这个问题**：`node_modules` 已存在时 pnpm 走缓存路径，不会报错；**只有全新安装才会触发**。
+本地复现方式（也是推送前的推荐动作）：
+
+```powershell
+Remove-Item node_modules -Recurse -Force
+pnpm install --frozen-lockfile      # 退出码必须是 0
+```
+
+修法写在 `pnpm-workspace.yaml` 的 `allowBuilds` 里（**值必须是布尔 `true`**）：
+
+```yaml
+allowBuilds:
+  esbuild: true
+  workerd: true
+  unrs-resolver: true
+```
+
+- v11 已移除 `onlyBuiltDependencies` / `neverBuiltDependencies`，统一用 `allowBuilds`
+- **不要**图省事用 `dangerouslyAllowAllBuilds: true`——那等于放行所有依赖（含未来的）的安装脚本
+- 新增依赖如果带了构建脚本，pnpm 会自动往这个文件里追加**占位符**
+  （`set this to true or false`），**占位符不算审核通过，安装照样失败**，要手动改成 `true`/`false`
+
 绑定自己的域名：Cloudflare Dashboard → 该 Worker → Settings → Domains & Routes → Add → Custom domain。
 
 > 为什么不用 Vercel：`*.vercel.app` 的默认域名在国内被 DNS 污染，自定义域名解析到 Vercel 也不稳。
